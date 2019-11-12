@@ -1,0 +1,511 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file is part of DobuDish                                           -->
+
+<!-- DobuDish is free software; you can redistribute it and/or modify        -->
+<!-- it under the terms of the GNU General Public License as published by    -->
+<!-- the Free Software Foundation; either version 2 of the License, or       -->
+<!-- (at your option) any later version.                                     -->
+
+<!-- DobuDish is distributed in the hope that it will be useful,             -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of          -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           -->
+<!-- GNU General Public License for more details.                            -->
+
+<!-- You should have received a copy of the GNU General Public License       -->
+<!-- along with DobuDish; if not, write to the Free Software                 -->
+<!-- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA -->
+
+<!-- (c) 2006 by AGYNAMIX                                                    -->
+<!-- You can download the latest version of this software at                 -->
+<!-- http://www.agynamix.de                                                  -->
+
+<project name="DobuDish output formats" >
+
+  <target name="javahelp" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                          description="Create an JavaHelp JAR file from your document">
+    <trycatch><try><antcall target="local-pre-javahelp" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-javahelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/javahelp.xsl" />
+
+    <!-- index the help file -->
+    <java fork="true" dir="${project.dir.output}/${project.output.mode}" failonerror="true" classname="com.sun.java.help.search.Indexer">
+      <classpath>
+        <fileset dir="${system.javahelp.dir}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+      <arg line="." />
+    </java>
+    
+    <trycatch><try><antcall target="local-pre-jar-javahelp" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-jar-javahelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    
+  	<jar destfile="${project.dir.output}/${project.output.mode}/${project.input.file}.jar"
+           basedir="${project.dir.output}/${project.output.mode}"
+           excludes="**/*.docbook">
+      <manifest id="MANIFEST.MF">
+        <attribute name="Built-By"   value="${user.name}"/>
+        <attribute name="Class-Path" value="jh.jar hsviewer.jar"/>
+        <attribute name="Arguments"  value="-helpset jhelpset.hs"/>
+        <attribute name="Run-Class"  value="sunw.demo.jhdemo.JHLauncher"/>
+        <attribute name="Main-Class" value="sunw.demo.jhdemo.Runner"/>
+      </manifest>
+    </jar>
+    
+    <trycatch><try><antcall target="local-pre-cleanup-javahelp" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-javahelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+  	<antcall target="cleanup-tmp-files" />
+    <antcall target="cleanup-style-files" />
+    <delete  quiet="yes" failonerror="no" includeemptydirs="yes">
+      <fileset dir="${project.dir.output}/${project.output.mode}" excludes="**/*.jar"/>
+    </delete>
+
+    <copy todir="${project.dir.output}/${project.output.mode}" file="${system.javahelp.dir}/jh.jar" />
+    <copy todir="${project.dir.output}/${project.output.mode}" file="${system.javahelp.dir}/hsviewer.jar" />
+    <trycatch><try><antcall target="local-post-javahelp" /></try><catch>
+	  <trycatch><try><antcall target="global-post-javahelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+  
+  <target name="eclipse" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                         description="Create an Eclipse help plugin from your document">
+    <trycatch><try><antcall target="local-pre-eclipse" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-eclipse" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/eclipse.xsl">
+      <xslt-argset>
+        <arg value="eclipse.plugin.id=${eclipse.plugin.id}" />
+        <arg value="eclipse.plugin.name=${eclipse.plugin.name}" />
+        <arg value="eclipse.plugin.provider=${eclipse.plugin.provider}" />
+        <arg value="eclipse.plugin.version=${eclipse.plugin.version}" />
+      </xslt-argset>
+    </xslt-runner>
+
+    <trycatch><try><antcall target="local-pre-jar-eclipse" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-jar-eclipse" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <jar destfile="${project.dir.output}/${project.output.mode}/${eclipse.plugin.id}_${eclipse.plugin.version}.jar"
+           basedir="${project.dir.output}/${project.output.mode}"
+           excludes="**/*.docbook">
+      <manifest id="MANIFEST.MF">
+        <attribute name="Built-By"   value="${user.name}"/>
+      </manifest>
+    </jar>
+    
+    <trycatch><try><antcall target="local-pre-cleanup-eclipse" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-eclipse" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+  	<antcall target="cleanup-tmp-files" />
+
+    <trycatch><try><antcall target="local-post-eclipse" /></try><catch>
+	  <trycatch><try><antcall target="global-post-eclipse" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="singlehtml" depends="init, copy-resources, copy-common-files, resolve-xinclude" 
+                            description="Create a single HTML file from your document">
+    <trycatch><try><antcall target="local-pre-singlehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-singlehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner outputfile="-o &quot;${project.dir.output}/${project.output.mode}/${project.input.file}.html&quot;"
+                 stylesheet="${project.custom-cfg.dir}/singlehtml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-singlehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-singlehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+
+    <trycatch><try><antcall target="local-post-singlehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-singlehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+    
+	<!-- , resolve-xinclude -->
+  <target name="html" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a chunked HTML representation of your document">
+    <trycatch><try><antcall target="local-pre-html" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-html" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/html.xsl" />
+
+  	<trycatch><try><antcall target="local-pre-cleanup-html" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-html" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-html" /></try><catch>
+	  <trycatch><try><antcall target="global-post-html" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="tablehtml" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a chunked Table-HTML representation of your document">
+    <trycatch><try><antcall target="local-pre-tablehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-tablehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/tablehtml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-tablehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-tablehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-tablehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-tablehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="framehtml" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a chunked Frames-HTML representation of your document">
+    <trycatch><try><antcall target="local-pre-framehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-framehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/framehtml.xsl" />
+
+  	<trycatch><try><antcall target="local-pre-cleanup-framehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-framehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-framehtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-framehtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="singlexhtml" depends="init, copy-resources, copy-common-files, resolve-xinclude" 
+                            description="Create a single XHTML file from your document">
+    <trycatch><try><antcall target="local-pre-singlexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-singlexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner outputfile="-o &quot;${project.dir.output}/${project.output.mode}/${project.input.file}.html&quot;"
+                 stylesheet="${project.custom-cfg.dir}/singlexhtml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-singlexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-singlexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+
+    <trycatch><try><antcall target="local-post-singlexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-singlexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+    
+  <target name="xhtml" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a chunked XHTML representation of your document">
+    <trycatch><try><antcall target="local-pre-xhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-xhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/xhtml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-xhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-xhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-xhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-xhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="tablexhtml" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a chunked Table-XHTML representation of your document">
+    <trycatch><try><antcall target="local-pre-tablexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-tablexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/tablexhtml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-tablexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-tablexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-tablexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-tablexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="framexhtml" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a chunked Frames-XHTML representation of your document">
+    <trycatch><try><antcall target="local-pre-framexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-framexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/framexhtml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-framexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-framexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+  	<antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-framexhtml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-framexhtml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="htmlhelp" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                          description="Create an Windows HTML representation of your document">
+    <trycatch><try><antcall target="local-pre-htmlhelp" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-htmlhelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/htmlhelp.xsl" />
+ 
+  	<!-- anyone wants to do some code after creating the html? -->
+    <trycatch><try><antcall target="local-pre-hhc-htmlhelp" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-hhc-htmlhelp" /></try><catch></catch></trycatch> 
+	</catch></trycatch> 
+  	
+    <!-- run the html files through the Windows Help Compiler -->
+    <exec executable="${system.dir}/htmlhelp/hhc" dir="${project.dir.output}/${project.output.mode}">
+      <arg line="htmlhelp.hhp"/>
+    </exec>
+    <move   file="${project.dir.output}/${project.output.mode}/htmlhelp.chm"
+          tofile="${project.dir.output}/${project.output.mode}/${project.input.file}.chm"/>
+
+    <trycatch><try><antcall target="local-pre-cleanup-htmlhelp" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-htmlhelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  	
+    <antcall target="cleanup-tmp-files" />
+    <delete>
+      <fileset dir="${project.dir.output}/${project.output.mode}">
+        <include name="**/*.html"/>
+        <include name="**/*.hhp"/>
+        <include name="**/*.hhc"/>
+        <include name="**/*.css"/>
+        <include name="images/" />
+      </fileset>
+    </delete>
+
+    <trycatch><try><antcall target="local-post-htmlhelp" /></try><catch>
+	  <trycatch><try><antcall target="global-post-htmlhelp" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="pdf" description="Create an PDF representation of your document">
+    <trycatch><try><antcall target="local-pre-pdf" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-pdf" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="pdf-fop" />
+    <trycatch><try><antcall target="local-pre-cleanup-pdf" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-pdf" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <antcall target="cleanup-style-files" />
+    <trycatch><try><antcall target="local-post-pdf" /></try><catch>
+	  <trycatch><try><antcall target="global-post-pdf" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="pdf-fop" depends="fo" >
+    <fop-runner  inputfile="${project.dir.output}/${project.output.mode}/${project.input.file}.fo"
+                 outputfile="${project.dir.output}/${project.output.mode}/${project.input.file}.pdf"
+                 maxmemory="${fop.pdf.maxmemory}" />
+  </target>
+
+  <target name="rtf" depends="fo" description="Create an RTF representation of your document">
+    <trycatch><try><antcall target="local-pre-rtf" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-rtf" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <java fork="true" dir="${project.dir.output}/${project.output.mode}" failonerror="true" classname="com.xmlmind.fo.converter.Driver">
+      <classpath refid="xfc.classpath" />
+      <arg line="${project.input.file}.fo" />
+      <arg line="${project.input.file}.rtf" />
+    </java>
+    <trycatch><try><antcall target="local-pre-cleanup-rtf" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-rtf" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <antcall target="cleanup-style-files" />
+    <trycatch><try><antcall target="local-post-rtf" /></try><catch>
+	  <trycatch><try><antcall target="global-post-rtf" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <!-- Generate a .fo file, prerequisite to pdf or rtf -->
+  <target name="fo" depends="init, copy-resources, copy-common-files, resolve-xinclude">
+    <trycatch><try><antcall target="local-pre-fo" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-fo" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner inputfile="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook"
+                 outputfile="-o &quot;${project.dir.output}/${project.output.mode}/${project.input.file}.fo&quot;"
+                 stylesheet="${project.custom-cfg.dir}/fo.xsl" />
+
+    <trycatch><try><antcall target="local-post-fo" /></try><catch>
+	  <trycatch><try><antcall target="global-post-fo" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+  
+  <target name="wordml" depends="init, copy-resources, copy-common-files, resolve-xinclude" 
+                        description="Create a single WordML file from your document">
+    <trycatch><try><antcall target="local-pre-wordml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-wordml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner inputfile="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook"
+    	         outputfile="-o &quot;${project.dir.output}/${project.output.mode}/${project.input.file}.xml&quot;"
+                 stylesheet="${project.custom-cfg.dir}/wordml.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-wordml" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-wordml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+
+    <trycatch><try><antcall target="local-post-wordml" /></try><catch>
+	  <trycatch><try><antcall target="global-post-wordml" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+  
+  <target name="manpages" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                       description="Create manpages from your document">
+    <trycatch><try><antcall target="local-pre-manpages" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-manpages" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/manpages.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-manpages" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-manpages" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+  	<antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-manpages" /></try><catch>
+	  <trycatch><try><antcall target="global-post-manpages" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <!-- Only for slides -->
+  <target name="svg" depends="init, copy-resources, copy-common-files, resolve-xinclude"
+                      description="Create a SVG representation of your SLIDES document">
+    <trycatch><try><antcall target="local-pre-svg" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-svg" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/svg.xsl" />
+    
+    <trycatch><try><antcall target="local-pre-cleanup-svg" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-svg" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-svg" /></try><catch>
+	  <trycatch><try><antcall target="global-post-svg" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+  
+  <!-- Only for website -->
+  <target name="ws-tab"  depends="init, copy-resources, copy-common-files"
+                         description="Create a tabular WEBSITE from your document">
+    <trycatch><try><antcall target="local-pre-ws-tab" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-ws-tab" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner dir="${project.dir.input}"
+    	         stylesheet="${project.custom-cfg.dir}/website-autolayout.xsl" 
+    	         inputfile="${project.dir.input}/layout.xml"
+    	         outputfile="-o &quot;${project.dir.input}/autolayout.xml&quot;" />
+    
+    <xslt-runner dir="${project.dir.input}"
+    	         stylesheet="${project.custom-cfg.dir}/website-chunk-tabular.xsl" 
+    	         inputfile="${project.dir.input}/autolayout.xml" 
+                 additionalArgs="output-root=&quot;${project.dir.output}/${project.output.mode}&quot;" />    	
+    
+    <trycatch><try><antcall target="local-pre-cleanup-ws-tab" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-ws-tab" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-ws-tab" /></try><catch>
+	  <trycatch><try><antcall target="global-post-ws-tab" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+  
+  <!-- Only for website -->
+  <target name="website"  depends="init, copy-resources, copy-common-files"
+                         description="Create a non tabular WEBSITE from your document">
+    <trycatch><try><antcall target="local-pre-website" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-website" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner dir="${project.dir.input}"
+    	         stylesheet="${project.custom-cfg.dir}/website-autolayout.xsl" 
+    	         inputfile="${project.dir.input}/layout.xml"
+    	         outputfile="-o &quot;${project.dir.input}/autolayout.xml&quot;" />
+    
+    <xslt-runner dir="${project.dir.input}"
+    	         stylesheet="${project.custom-cfg.dir}/website-chunk.xsl" 
+    	         inputfile="${project.dir.input}/autolayout.xml" 
+                 additionalArgs="output-root=&quot;${project.dir.output}/${project.output.mode}&quot;" />    	
+    
+    <trycatch><try><antcall target="local-pre-cleanup-website" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-cleanup-website" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+    <antcall target="cleanup-tmp-files" />
+    <trycatch><try><antcall target="local-post-website" /></try><catch>
+	  <trycatch><try><antcall target="global-post-website" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <!-- Generate a .epub document -->
+  <target name="epub-gen" depends="init, copy-resources, copy-common-files, resolve-xinclude">
+    <trycatch><try><antcall target="local-pre-epub-gen" /></try><catch>
+      <trycatch><try><antcall target="global-pre-epub-gen" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner stylesheet="${project.custom-cfg.dir}/epub.xsl" />
+
+    <trycatch><try><antcall target="local-post-epub-gen" /></try><catch>
+	  <trycatch><try><antcall target="global-post-epub-gen" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <!-- Generate a compressed .epub document -->
+  <target name="epub" depends="epub-gen">
+    <trycatch><try><antcall target="local-pre-epub" /></try><catch>
+      <trycatch><try><antcall target="global-pre-epub" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <echo file="${project.dir.output}/${project.output.mode}/mimetype" append="false">application/epub+zip</echo>
+  	<move file="${project.dir.output}/${project.output.mode}/style.css" tofile="${project.dir.output}/${project.output.mode}/OEBPS/style.css" />
+
+	<zip destfile="${project.dir.output}/${project.output.mode}/${project.input.file}.epub" update="false">
+		<zipfileset dir="${project.dir.output}/${project.output.mode}">
+			<include name="META-INF/**"/>
+			<include name="OEBPS/**"/>
+			<include name="images/**"/>
+			<include name="style.css"/>			
+			<include name="mimetype"/>
+		</zipfileset>
+	</zip>
+  	
+	
+    <antcall target="cleanup-tmp-files" />
+    <delete includeemptydirs="true">
+      <fileset dir="${project.dir.output}/${project.output.mode}">
+        <include name="META-INF/**"/>
+        <include name="OEBPS/**"/>
+        <include name="images/**"/>
+        <include name="style.css"/>			
+        <include name="mimetype"/>
+      </fileset>
+    </delete>
+    
+
+    <trycatch><try><antcall target="local-post-epub" /></try><catch>
+	  <trycatch><try><antcall target="global-post-epub" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+    
+</project>

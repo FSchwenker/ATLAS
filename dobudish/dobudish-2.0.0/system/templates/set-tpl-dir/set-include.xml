@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE book
+  [
+    <!ENTITY % global.entities SYSTEM "../../../system/custom-xsl/global-entities.xml">
+    %global.entities;
+
+    <!ENTITY % entities SYSTEM "../custom-cfg/local-entities.xml">
+    %entities;
+  ]
+>
+
+<ximy:includelist xmlns:ximy="http://www.agynamix.de/XincludeExtension">
+
+  <book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"> 
+    <bookinfo>
+      <title>
+  		This is an example of a xincluded book part
+  	  </title>
+  	</bookinfo> 
+	  <chapter>
+		  <title>
+			  Some chapter
+		  </title> 
+		  <para>
+			  Very useless chapter text. I hope you have a better idea of what to write
+			  for your master thesis! 
+		  </para> 
+	  </chapter> 
+  </book>
+
+</ximy:includelist>

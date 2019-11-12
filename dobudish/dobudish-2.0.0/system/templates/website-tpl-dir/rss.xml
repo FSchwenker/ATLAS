@@ -1,0 +1,22 @@
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website V2.6//EN"
+          "http://docbook.sourceforge.net/release/website/2.6/schema/website.dtd">
+<webpage id="rss">
+<config param="rcsdate" value="$Date: 2003/01/16 15:05:46 $"/>
+<head>
+<title>RSS</title>
+</head>
+
+<webtoc/>
+
+<para>This page demonstrates integration of
+<ulink url="http://www.purl.org/rss/1.0/">RSS 1.0</ulink> site summaries
+into Website.</para>
+
+<para>This is the <quote>What's New</quote> feed
+from <ulink url="http://nwalsh.com/"/>:
+</para>
+
+<rss feed="http://nwalsh.com/rss/whatsnew.xml"/>
+
+</webpage>
+

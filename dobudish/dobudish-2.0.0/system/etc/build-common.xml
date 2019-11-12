@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This file is part of DobuDish                                           -->
+
+<!-- DobuDish is free software; you can redistribute it and/or modify        -->
+<!-- it under the terms of the GNU General Public License as published by    -->
+<!-- the Free Software Foundation; either version 2 of the License, or       -->
+<!-- (at your option) any later version.                                     -->
+
+<!-- DobuDish is distributed in the hope that it will be useful,             -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of          -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           -->
+<!-- GNU General Public License for more details.                            -->
+
+<!-- You should have received a copy of the GNU General Public License       -->
+<!-- along with DobuDish; if not, write to the Free Software                 -->
+<!-- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA -->
+
+<!-- (c) 2006 by AGYNAMIX                                                    -->
+<!-- You can download the latest version of this software at                 -->
+<!-- http://www.agynamix.de                                                  -->
+
+<project name="DobuDish common definitions">
+
+  <path id="saxon.classpath">
+    <fileset dir="${system.saxon.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+    <fileset dir="${system.catalog-resolver.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+    <pathelement path="${system.catalog-resolver.dir}" />
+  </path>
+
+  <path id="xfc.classpath">
+    <fileset dir="${system.dir}/xfc">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <path id="validator.classpath">
+    <fileset dir="${system.dir}/validator">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <!-- The XMLCatalog to resolve the Docbook DTD's. If you add a new version you need to add an entry here!
+       Currently there are two mechanisms to resolve DTD's: Catalog-Resolver which is used by Saxon and
+       this one, used by xmlvalidate. This should be consolidated into only one mechanism, preferrably
+       XMLCatalog as this is easier to handle.
+  <xmlcatalog id="system.xmlcatalog">
+    <dtd publicId="-//OASIS//DTD DocBook XML V5.0//EN" location="${system.dir}/docbook-schema/5.0/catalog.xml" />
+    <dtd publicId="-//Norman Walsh//DTD Slides V3.4//EN" location="${system.dir}/docbook-slides/schema/dtd/slides.dtd" />
+    <dtd publicId="-//Norman Walsh//DTD Website V2.6//EN" location="${system.dir}/docbook-website/schema/dtd/website.dtd" />
+    <dtd publicId="-//Norman Walsh//DTD Website Autolayout V2.5.0//EN" location="${system.dir}/docbook-website/schema/dtd/autolayout.dtd" />
+    <dtd publicId="-//Norman Walsh//DTD Website V2.5.0//EN" location="${system.dir}/docbook-website/schema/dtd/website.dtd" />
+  </xmlcatalog>
+ -->
+
+  <target name="init">
+    <trycatch><try><antcall target="local-pre-init" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-init" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <mkdir dir="${project.dir.output}/${project.output.mode}" />
+    <delete includeemptydirs="true">
+      <fileset dir="${project.dir.output}/${project.output.mode}">
+        <include name="**/*" />
+      </fileset>
+    </delete>
+
+    <!-- check the document type:
+      First we check is document.<name>.type is set, if not
+      we check for document.type, else
+      we use the standard procedure -->
+    <if><isset property="document.${project.input.file}.type" />
+      <then>
+        <resolveProperty property="document.calculated.type" value="${project.input.file}" />
+      </then>
+      <elseif><isset property="document.type" />
+        <then>
+        <property name="document.calculated.type" value="${document.type}" />         
+        </then>
+      </elseif>
+    </if>
+    <echo message="document.type=${document.calculated.type}" />
+    <if>
+      <not>
+        <isset property="document.calculated.type" />
+      </not>
+      <then>
+        <echo message="WARNING: Please insert document.type=&lt;article|book|set|slides|webpage&gt; into localbuild.properties as the preferred way to determine the document type." />
+        <loadfile property="input.file.to.check" srcFile="${project.dir.input}/${project.input.file}.xml" />
+        <if>
+          <contains string="${input.file.to.check}" substring="!DOCTYPE book" casesensitive="false" />
+          <then>
+            <echo message="Processing a BOOK document" />
+            <property name="input.doctype" value="book" />
+          </then>
+          <elseif>
+            <contains string="${input.file.to.check}" substring="!DOCTYPE slides" casesensitive="false" />
+            <then>
+              <echo message="Processing a SLIDES document" />
+              <property name="input.doctype" value="slides" />
+            </then>
+          </elseif>
+          <elseif>
+            <contains string="${input.file.to.check}" substring="!DOCTYPE webpage" casesensitive="false" />
+            <then>
+              <echo message="Processing a WEBSITE document" />
+              <property name="input.doctype" value="webpage" />
+            </then>
+          </elseif>
+          <elseif>
+            <contains string="${input.file.to.check}" substring="!DOCTYPE set" casesensitive="false" />
+            <then>
+              <echo message="Processing a SET document" />
+              <property name="input.doctype" value="set" />
+            </then>
+          </elseif>
+          <else>
+            <echo message="Processing NOT a BOOK nor a SET nor a SLIDES nor a WEBPAGE document" />
+            <property name="input.doctype" value="generic" />
+          </else>
+        </if>
+      </then>
+      <else>
+        <if>
+          <equals arg1="${document.calculated.type}" arg2="book" />
+          <then>
+            <echo message="Processing a BOOK document" />
+            <property name="input.doctype" value="book" />
+          </then>
+          <elseif>
+            <equals arg1="${document.calculated.type}" arg2="slides" />
+            <then>
+              <echo message="Processing an SLIDES document" />
+              <property name="input.doctype" value="slides" />
+            </then>
+          </elseif>
+          <elseif>
+            <equals arg1="${document.calculated.type}" arg2="webpage" />
+            <then>
+              <echo message="Processing an WEBPAGE document" />
+              <property name="input.doctype" value="webpage" />
+            </then>
+          </elseif>
+          <elseif>
+            <equals arg1="${document.calculated.type}" arg2="set" />
+            <then>
+              <echo message="Processing an SET document" />
+              <property name="input.doctype" value="set" />
+            </then>
+          </elseif>
+          <else>
+            <echo message="Processing NOT a BOOK nor a SET nor a SLIDES nor a WEBPAGE document" />
+            <property name="input.doctype" value="generic" />
+          </else>
+        </if>
+      </else>
+    </if>
+    <trycatch><try><antcall target="local-post-init" /></try><catch>
+	  <trycatch><try><antcall target="global-post-init" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="copy-resources">
+    <if>
+      <available file="${project.dir.input}/resource" type="dir" />
+      <then>
+        <echo message="resource directory is deprecated. Please use the carbon copy directory. See manual for details." />
+        <copy todir="${project.dir.output}/${project.output.mode}/resource" failonerror="false">
+          <fileset dir="${project.dir.input}/resource" />
+        </copy>
+      </then>
+    </if>
+    <if>
+      <available file="${project.dir.input}/${special.folder.name.carbonCopy}" type="dir" />
+      <then>
+        <copy todir="${project.dir.output}/${project.output.mode}" failonerror="false">
+          <fileset dir="${project.dir.input}/${special.folder.name.carbonCopy}" />
+        </copy>
+      </then>
+    </if>
+  </target>
+
+  <!--
+    Copy common files from project custom dir. If this is not existant, copy from system custom dir.
+  -->
+  <target name="copy-common-files">
+    <if>
+      <available file="${project.custom-cfg.dir}/common-files" type="dir" />
+      <then>
+        <copy todir="${project.dir.output}/${project.output.mode}">
+          <fileset dir="${project.custom-cfg.dir}/common-files" />
+        </copy>
+      </then>
+      <else>
+        <if>
+          <equals arg1="${input.doctype}" arg2="slides" />
+          <then>
+            <copy todir="${project.dir.output}/${project.output.mode}">
+              <fileset dir="${system.custom-xsl.dir}/common-files-slides" />
+            </copy>
+          </then>
+          <elseif>
+            <equals arg1="${input.doctype}" arg2="webpage" />
+            <then>
+              <copy todir="${project.dir.output}/${project.output.mode}">
+                <fileset dir="${system.custom-xsl.dir}/common-files-webpage" />
+              </copy>
+            </then>
+          </elseif>
+          <else>
+            <copy todir="${project.dir.output}/${project.output.mode}">
+              <fileset dir="${system.custom-xsl.dir}/common-files" />
+            </copy>
+          </else>
+        </if>
+      </else>
+    </if>
+    <if>
+      <available file="${project.custom-cfg.dir}/style-common.css" />
+      <then>
+        <copy failonerror="true" tofile="${project.dir.output}/${project.output.mode}/style.css" file="${project.custom-cfg.dir}/style-common.css" />
+      </then>
+    </if>
+    <if>
+      <available file="${project.custom-cfg.dir}/style-${project.output.mode}.css" />
+      <then>
+        <copy overwrite="true" failonerror="false" tofile="${project.dir.output}/${project.output.mode}/style.css" file="${project.custom-cfg.dir}/style-${project.output.mode}.css" />
+      </then>
+    </if>
+  </target>
+
+  <target name="cleanup-tmp-files">
+    <if>
+      <equals arg1="${input.doctype}" arg2="webpage" />
+      <then>
+        <delete quiet="true" failonerror="false" file="${project.dir.input}/autolayout.xml" />
+      </then>
+      <else>
+        <delete quiet="true" failonerror="false" file="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook" />
+      </else>
+    </if>
+  </target>
+
+  <target name="cleanup-style-files">
+    <delete quiet="true" failonerror="false" file="${project.dir.output}/${project.output.mode}/${project.input.file}.fo" />
+    <delete quiet="true" failonerror="false" file="${project.dir.output}/${project.output.mode}/style.css" />
+    <delete quiet="true" failonerror="false" includeemptydirs="true">
+      <fileset dir="${project.dir.output}/${project.output.mode}/images" />
+    </delete>
+  </target>
+
+
+  <macrodef name="xslt-runner">
+    <attribute name="dir" default="${project.dir.output}/${project.output.mode}" />
+    <attribute name="inputfile" default="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook" />
+    <attribute name="outputfile" default="" />
+    <attribute name="stylesheet" />
+    <attribute name="maxmemory" default="${xslt.maxmemory.default}" />
+    <attribute name="additionalArgs" default="" />
+    <element name="xslt-argset" optional="true" />
+    <sequential>
+      <java fork="true" dir="@{dir}" failonerror="true" maxmemory="@{maxmemory}" classname="com.icl.saxon.StyleSheet">
+        <classpath refid="saxon.classpath" />
+        <jvmarg line="-Dhttp.proxyHost=${http.proxyHost}" />
+        <jvmarg line="-Dhttp.proxyPort=${http.proxyPort}" />
+        <jvmarg line="-Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl" />
+        <jvmarg line="-Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl" />
+        <jvmarg line="-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=org.apache.xerces.parsers.XIncludeParserConfiguration" />
+        <arg line="-x org.apache.xml.resolver.tools.ResolvingXMLReader" />
+        <arg line="-y org.apache.xml.resolver.tools.ResolvingXMLReader" />
+        <arg line="-r org.apache.xml.resolver.tools.CatalogResolver" />
+        <arg line="@{outputfile}" />
+        <arg value="@{inputfile}" />
+        <arg value="@{stylesheet}" />
+        <arg line="docbook-schema.version=${docbook-schema.version}" />
+        <arg line="@{additionalArgs}" />
+        <xslt-argset />
+      </java>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="fop-runner">
+    <attribute name="dir" default="${project.dir.output}/${project.output.mode}" />
+    <attribute name="inputfile" default="${project.dir.output}/${project.output.mode}/${project.input.file}.fo" />
+    <attribute name="outputfile" default="${project.dir.output}/${project.output.mode}/${project.input.file}.pdf" />
+    <attribute name="maxmemory" default="${fop.maxmemory.default}" />
+    <sequential>
+      <java fork="true" dir="@{dir}" failonerror="true" maxmemory="@{maxmemory}" classname="org.apache.fop.cli.Main">
+        <classpath>
+          <fileset dir="${system.fop.dir}/build">
+            <include name="**/*.jar" />
+          </fileset>
+          <fileset dir="${system.fop.dir}/lib">
+            <include name="**/*.jar" />
+          </fileset>
+        </classpath>
+        <jvmarg line="-Dhttp.proxyHost=${http.proxyHost}" />
+        <jvmarg line="-Dhttp.proxyPort=${http.proxyPort}" />
+        <arg line="-c &quot;${system.fop.dir}/conf/fop.xconf&quot;" />
+        <arg line="-fo &quot;@{inputfile}&quot;" />
+        <arg line="-pdf &quot;@{outputfile}&quot;" />
+      </java>
+    </sequential>
+  </macrodef>
+
+  <!-- Needed to resolve a nested property like ${document.${input.file}.type} -->
+  <macrodef name="resolveProperty">
+      <attribute name="property" />
+      <attribute name="value" />
+      <sequential>
+        <property name="tmp1.@{property}" value="document.@{value}.type" />
+        <resolveProperty2 property="@{property}" value="${tmp1.@{property}}" />
+      </sequential>
+  </macrodef>
+
+  <macrodef name="resolveProperty2">
+    <attribute name="property" />
+    <attribute name="value" />
+    <sequential>
+      <property name="@{property}" value="${@{value}}" />
+    </sequential>
+  </macrodef>
+  
+  <!-- resolve-xinclude creates the .docbook file that contains all the XInclude'd elements -->
+  <target name="resolve-xinclude" depends="init">
+    <trycatch><try><antcall target="local-pre-resolve-xinclude" /></try><catch>
+	  <trycatch><try><antcall target="global-pre-resolve-xinclude" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+
+    <xslt-runner inputfile="${project.dir.input}/${project.input.file}.xml" outputfile="-o &quot;${project.dir.output}/${project.output.mode}/${project.input.file}.docbook&quot;" stylesheet="${system.custom-xsl.dir}/resolve-xinclude.xsl" />
+
+    <antcall target="substitute-properties" />
+
+    <trycatch><try><antcall target="local-post-resolve-xinclude" /></try><catch>
+	  <trycatch><try><antcall target="global-post-resolve-xinclude" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="substitute-properties">
+    <if>
+      <equals arg1="${substitute.properties}" arg2="yes" />
+      <then>
+        <typedef resource="foundrylogic/vpp/typedef.properties" />
+        <taskdef resource="foundrylogic/vpp/taskdef.properties" />
+
+        <vppcopy overwrite="true" file="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook"
+            tofile="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook2">
+        </vppcopy>
+        <move  overwrite="yes" tofile="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook" 
+             file="${project.dir.output}/${project.output.mode}/${project.input.file}.docbook2"/>
+      </then>
+    </if>
+  </target>
+
+</project>

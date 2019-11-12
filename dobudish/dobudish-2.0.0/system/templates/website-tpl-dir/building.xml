@@ -1,0 +1,14 @@
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website V2.6//EN"
+          "http://docbook.sourceforge.net/release/website/2.6/schema/website.dtd">
+<webpage id="building">
+<config param="desc" value="Building the HTML Pages"/>
+<config param="rcsdate" value="$Date: 2003/01/16 15:05:46 $"/>
+<head>
+<title>Building the HTML Pages</title>
+<titleabbrev>Building</titleabbrev>
+<summary>Building strategies</summary>
+</head>
+
+<para>dummy page</para>
+
+</webpage>

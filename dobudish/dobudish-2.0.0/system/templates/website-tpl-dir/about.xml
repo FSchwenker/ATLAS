@@ -1,0 +1,12 @@
+<!DOCTYPE webpage PUBLIC "-//Norman Walsh//DTD Website V2.6//EN"
+          "http://docbook.sourceforge.net/release/website/2.6/schema/website.dtd">
+<webpage id="about">
+<config param="rcsdate" value="$Date: 2003/01/16 15:05:46 $"/>
+<head>
+<title>About the Test Home Page</title>
+<summary>About the Test Home Page</summary>
+</head>
+<para>This collection of pages is built from a set of XML
+documents using XSLT.</para>
+</webpage>
+

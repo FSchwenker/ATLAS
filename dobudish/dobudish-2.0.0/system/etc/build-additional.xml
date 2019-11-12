@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file is part of DobuDish                                           -->
+
+<!-- DobuDish is free software; you can redistribute it and/or modify        -->
+<!-- it under the terms of the GNU General Public License as published by    -->
+<!-- the Free Software Foundation; either version 2 of the License, or       -->
+<!-- (at your option) any later version.                                     -->
+
+<!-- DobuDish is distributed in the hope that it will be useful,             -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of          -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           -->
+<!-- GNU General Public License for more details.                            -->
+
+<!-- You should have received a copy of the GNU General Public License       -->
+<!-- along with DobuDish; if not, write to the Free Software                 -->
+<!-- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA -->
+
+<!-- (c) 2006 by AGYNAMIX                                                    -->
+<!-- You can download the latest version of this software at                 -->
+<!-- http://www.agynamix.de                                                  -->
+
+<project name="DobuDish additional targets" >
+
+  <!-- Generate a new Titlepage specification -->
+  <target name="titlespec" >
+
+    <xslt-runner dir="${system.titlespec.dir}"
+                 inputfile="${project.input.file}.xml"
+                 outputfile="-o &quot;${system.titlespec.dir}/${project.input.file}.xsl&quot;"
+                 stylesheet="${system.docbook-xsl.dir}/template/titlepage.xsl" />
+        
+  </target>
+  
+  <target name="validate" depends="resolve-xinclude" description="Check a document if it is valid">
+  	<java fork="true" dir="${project.dir.output}/${project.output.mode}" failonerror="true" maxmemory="${validator.maxmemory}" classname="com.sun.msv.schematron.Driver">
+      <classpath refid="validator.classpath" />
+  	  <jvmarg line="${validator.stacksize}"/>
+      <jvmarg line="-Dhttp.proxyHost=${http.proxyHost}" />
+      <jvmarg line="-Dhttp.proxyPort=${http.proxyPort}" />        
+      <arg value="${system.docbook-schema.rng.dir}/docbook.rng" />
+      <arg value="${project.input.file}.docbook" />
+    </java>    	
+  </target>
+  
+  <target name="create" description="Create a new [book, article, set, slides, website] document">
+    <echo>Create a new project ${project.input.document}</echo>
+    <mkdir dir="${project.dir}"/>
+    <trycatch><try><antcall target="global-pre-create" /></try><catch></catch></trycatch>
+    <copy todir="${project.custom-cfg.dir}" failonerror="true">
+      <fileset dir="${system.template.dir}/${ENV_PARAM_3}-tpl-dir/${ENV_PARAM_3}-cfg" />
+    </copy>
+    <trycatch><try><antcall target="local-post-cp-custom" /></try><catch>
+	  <trycatch><try><antcall target="global-post-cp-custom" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  	<copy todir="${project.dir.input}" failonerror="false">
+      <fileset dir="${system.template.dir}/${ENV_PARAM_3}-tpl-dir">
+      	<exclude name="${ENV_PARAM_3}.xml" />
+      	<exclude name="${ENV_PARAM_3}-include.xml" />
+      	<exclude name="**/${ENV_PARAM_3}-cfg/**"/>
+      </fileset>
+    </copy>
+    <trycatch><try><antcall target="local-post-cp-template" /></try><catch>
+	  <trycatch><try><antcall target="global-post-cp-template" /></try><catch>
+	</catch></trycatch></catch></trycatch>    
+	<if><not><equals arg1="${ENV_PARAM_3}" arg2="website" /></not>
+	  <then>
+        <copy tofile="${project.dir.input}/${project.input.document}.xml" file="${system.template.dir}/${ENV_PARAM_3}-tpl-dir/${ENV_PARAM_3}.xml" />
+        <copy tofile="${project.dir.input}/${ENV_PARAM_3}-include.xml" file="${system.template.dir}/${ENV_PARAM_3}-tpl-dir/${ENV_PARAM_3}-include.xml" failonerror="false" />
+        <trycatch><try><antcall target="local-post-cp-example" /></try><catch>
+		  <trycatch><try><antcall target="global-post-cp-example" /></try><catch></catch></trycatch>
+		</catch></trycatch>		
+	  </then>
+	</if>
+    <trycatch><try><antcall target="local-post-create" /></try><catch>
+	  <trycatch><try><antcall target="global-post-create" /></try><catch></catch></trycatch>
+	</catch></trycatch>
+  </target>
+
+  <target name="clean" description="Clean up a document's output directory">
+    <echo>Clean up ${project.input.document}</echo>
+    <delete includeemptydirs="true">
+      <fileset dir="${project.dir.output}" >
+        <include name="**/*" />
+      </fileset>
+    </delete>
+  </target>
+
+</project>

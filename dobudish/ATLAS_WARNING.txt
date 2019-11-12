@@ -1,0 +1,1 @@
+pdf creation only works with openjdk-6, NOT openjdk-7 at this point (the point being May, 25th 2012)

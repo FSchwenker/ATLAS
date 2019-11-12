@@ -1,0 +1,25 @@
+# Linux Shell
+*.sh  text eol=lf
+# Windows PowerShell
+*.ps1 text eol=crlf
+# C/C++
+*.h   text eol=native
+*.hpp text eol=native
+*.inl text eol=native
+*.cpp text eol=native
+*.cxx text eol=native
+*.cmake text eol=native
+*.rc.in text eol=crlf
+# Java
+*.java text eol=native
+# Python
+*.py  text eol=native
+# Generic
+*.txt text eol=native
+*.xml text eol=native
+*.json text eol=native
+# Qt
+*.qml text eol=native
+*.qrc text eol=native
+# Data
+#*.caffemodel filter=lfs diff=lfs merge=lfs -text

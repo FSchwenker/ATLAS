@@ -1,0 +1,7 @@
+Atlas.properties
+ATLAS.jar
+ATLAS_Semaine.config
+log4j.properties
+logs/
+out/
+target/

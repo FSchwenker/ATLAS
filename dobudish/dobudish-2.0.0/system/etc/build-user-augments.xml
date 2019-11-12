@@ -1,0 +1,10 @@
+﻿<?xml version="1.0"?>
+<project>
+
+  <!--
+  You can use this file to define pre/post targets that are common to all your documents.
+  You can also use it to define pre/post targets for the creation process 
+  when localbuild.xml is not yet available.
+  -->
+  
+</project>

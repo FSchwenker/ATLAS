@@ -1,0 +1,141 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>DobuDish Release Notes</title><link rel="stylesheet" type="text/css" href="style.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1-RC2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="article" title="DobuDish Release Notes"><div class="titlepage"><div><div><h2 class="title"><a name="d0e1"></a>
+         <span class="emphasis"><em>DobuDish</em></span> Release Notes</h2></div><div><p class="releaseinfo">Version 1.5 </p></div><div><p class="copyright">Copyright &copy; 2006-2008 AGYNAMIX</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#d0e20">1. Release Notes</a></span></dt></dl></div><p></p><div class="sect1" title="1.&nbsp;Release Notes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="d0e20"></a>1.&nbsp;Release Notes</h2></div></div></div><p></p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
+               <span class="bold"><strong>Version 1.1.1</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>I expanded the manual to document the existing build hooks that are at your
+		  disposal.</p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 1.1.0</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>I have added new global hooks into the Ant build scripts. Using the global
+		    hooks you can define actions for all documents in your document directory. A global hook
+			is executed only if no local hook of the same name exists. To call a global hook additionally
+			to the local one you have to explicitly call it from the local hook.
+		  </p><p>
+		    There is a new file called <span class="emphasis"><em>build-user-augments.xml</em></span> which is supposed to hold
+			the global hooks you define.
+		  </p><p>
+		    Also there are new global hooks around the <span class="emphasis"><em>create</em></span> target- a few of them
+			without local counterparts because there is not yet a localbuild.xml in existence.
+			Please see the manual for a (hopefully) complete list of build hooks.
+		  </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 1.0.0</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>I renamed <span class="bold"><strong>Dopus</strong></span> to 
+		    <span class="bold"><strong>DobuDish</strong></span> due to a naming conflict 
+			with <a class="ulink" href="http://www.gpsoft.com.au/intro.html" target="_top">Dopus</a>.
+		  </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.16</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>Fixed bug with the new document.type mechanism. There was an oversight
+		  for documents that contain sub documents of a different document type than the main
+		  document. In <span class="emphasis"><em>localbuild.properties</em></span> you can now add additional entries
+		  of the form
+		  </p><pre class="programlisting">
+		    document.&lt;file name&gt;.type=article|book|...
+		  </pre><p>
+		  Now when you process your sub document and an entry for this document is found it overwrites
+		  the <span class="emphasis"><em>document.type</em></span> setting.
+		  </p><p>
+		  This also is possible for the master document. So you might set <span class="emphasis"><em>document.type</em></span>
+		  to the default document type and overwrite only those that differ from that one.
+		  </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.15</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>There is a new property in localbuild.properties which determines the type of the document.
+				The templates have been adapted but you have to adapt your existing documents yourself. To do that
+				please insert into localbuild.properties:
+				</p><pre class="programlisting">
+   document.type = &lt;doctype&gt;
+				</pre><p>
+				where &lt;doctype&gt; is one of <span class="emphasis"><em>book, article, set, slides, webpage</em></span>.
+				</p><p>The old way is still supported but deprecated.</p></li><li class="listitem"><p>Cleaned up some glitches with the website document type.</p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.14</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>Support for Website creation. The new targets "ws-tab" for the
+          creation of tabular website and "website" for non tabular websites.</p></li><li class="listitem"><p>If you now create a directory "copy_to_output" it's content will
+                        entirely and recursively be copied to the output directory.</p></li><li class="listitem"><p>You can now have a folder "common-files" in the "custom-cfg"
+          folder of your document. If that one exists, common files will be taken from there instead
+          from the global "custom-xsl" directory.</p></li><li class="listitem"><p>Cleaned up a bug in the generator script that appeared on Linux.</p></li><li class="listitem"><p>No more warnings when a specific style.css is not available</p></li></ul></div></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.13</strong></span>
+            </p></li><li class="listitem"><p>Bug fix: There where problems with the included font. The XML files where not
+     created properly in order to support being search on for instance in Acrobat Reader.</p></li><li class="listitem"><p>Bug fix: The XSL file resolve-xinclude.xsl still put DocBook 4.4 in the header
+    which would cause problems in that the system would bot use the cataloged DocBook 4.5 files
+    but would rather download the 4.4 ones. </p></li></ul></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.12</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>
+          Added more build file hooks (local-pre-...) when document types need more than one
+          step to generate. There is also such a hook before the cleanup step is called. This
+          is useful if you want to copy or keep files that would otherwise be deleted.
+        </p></li><li class="listitem"><p>
+          Removed the commented out hooks from the localbuild.xml files. Please see the manual
+          for all available hooks. The files would just be too cluttered if they would contain
+          all the possible hooks and would get in your way seeing the few hooks you really need
+          in your current project.
+        </p></li><li class="listitem"><p>
+          Added more build file hooks (local-pre-...) when document types need more than one
+          step to generate. There is also such a hook before the cleanup step is called. This
+          is useful if you want to copy or keep files that would otherwise be deleted.
+        </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.11</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>
+          Support for the <span class="bold"><strong>DocBook Set</strong></span> data type.
+        </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.9</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>
+          Support for <span class="bold"><strong>Docbook Slides</strong></span>. Requested by some faithful users
+          I finally got around to implement them. You can create a Slides document by issueing:
+          </p><pre class="programlisting">
+   ./generator.bat fluffyslides create slides          
+          </pre><p>
+          You can use the usual targets to generate the output. Additional to <span class="emphasis"><em>pdf, html, xhtml</em></span>
+          you can use <span class="emphasis"><em>tablehtml, framehtml, tablexhtml, framexhtml</em></span>.
+        </p><p>
+          You should see the Slides support als beta release. The customization layer is virtually not existent at
+          the moment. I'd ask those working with slides to make suggestions as to what needs to be included.
+          The targets <span class="emphasis"><em>svg</em></span> and <span class="emphasis"><em>htmlhelp</em></span> do not work yet. You are free 
+          and very, very welcome to give your feedback and help in making slides support better.
+        </p></li><li class="listitem"><p>
+          Now build on a Mac. That means the generator.sh script is packaged with the right
+          permissions (755) so you can execute it right away.
+        </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.8</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>
+          Changed property substitution to use <span class="emphasis"><em>VPP</em></span>. The
+          former mechanism could not access properties that did not come from
+          a property file but where generated inside Ant (a timestamp for example).
+          Variables are now expressed by \$ant.get("<span class="emphasis"><em>PropertyName</em></span>").
+        </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.7</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>Property substitution in Docbook documents: The separator can be adjusted in 
+        build.properties (or overwritten in localbuild.properties if you want to have different 
+        separators in your files). This mechanism is disabled by default, to enable, set 
+        'substitute.properties=yes' in your build.properties file (or localbuild.properties)</p></li><li class="listitem"><p>Linebreak support in html based and fo customization layers:<br>
+        Just type &lt;?lb ?&gt; which will result in a line<br> at the resulting position.</p></li><li class="listitem"><p>Added target "manpages"</p></li><li class="listitem"><p>Added target "wordml"</p></li><li class="listitem"><p>You can now have multiple documents within a document directory. 
+        To process documents other then the master document (same name as the doc dir):
+        <code class="computeroutput">generator.bat fluff pdf subfluff</code>
+                  </p><p>
+        If the 3rd parameter is omitted the document is assumed to be of the same name as the documents
+        directory (e.g. fluff.xml for a document directory named "fluff" (as usual).
+        </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Version 0.9.6</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>Support for HTTP Proxy for Fop and Saxon. To use the proxy,
+        please open the file "build.properties" in a file editor and edit the
+        lines with the entries "http.proxyHost=" and "http.proxyPort="</p><p>
+          Please add your proxy host and port here like so:
+          </p><pre class="programlisting">
+   http.proxyHost=host.example.com
+   http.proxyPort=8080       
+          </pre><p>
+          You administrator should know these values.
+        </p></li><li class="listitem"><p>
+          Moved some properties into the global build.properties file. These values can be adapted
+          if the need arises. You can also overwrite those values in the document local file
+          localbuild.properties.
+        </p></li><li class="listitem"><p>
+        Javahelp now indexes it's help sets.
+        </p></li><li class="listitem"><p>
+        I split the <span class="emphasis"><em>DobuDish</em></span> distributions into one with JRE (the big one) and one without. If you already have
+        your Windows&reg; JRE installed or you are using <span class="emphasis"><em>DobuDish</em></span> on a Unix&#8482; or Mac OS X&reg; machine,
+        you should download the version without the JRE. It looks for the environment variable "JAVA_HOME".
+        If this is found <span class="emphasis"><em>DobuDish</em></span> will use the Java version pointed to by the variable. If it is not found <span class="emphasis"><em>DobuDish</em></span> will
+        try and search "java" in the PATH variable. If it finds it it will be used, otherwise <span class="emphasis"><em>DobuDish</em></span>
+        will give up with an error message.
+        </p></li></ul></div></li><li class="listitem"><p>
+               <span class="bold"><strong>Older versions:</strong></span>
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem"><p>Added the GPL note to the files sources</p></li><li class="listitem"><p>create License directory</p></li><li class="listitem"><p>remove unneeded stuff</p></li><li class="listitem"><p>Switch to UTF-8</p></li><li class="listitem"><p>distribute target for documents</p></li><li class="listitem"><p>version number per document (document.version) in localbuild.properties</p></li><li class="listitem"><p>support for multiple Docbook versions</p></li></ul></div></li></ul></div></div></div></body></html>

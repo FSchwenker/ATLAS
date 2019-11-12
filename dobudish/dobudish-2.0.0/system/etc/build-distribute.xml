@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file is part of DobuDish                                           -->
+
+<!-- DobuDish is free software; you can redistribute it and/or modify        -->
+<!-- it under the terms of the GNU General Public License as published by    -->
+<!-- the Free Software Foundation; either version 2 of the License, or       -->
+<!-- (at your option) any later version.                                     -->
+
+<!-- DobuDish is distributed in the hope that it will be useful,             -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of          -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           -->
+<!-- GNU General Public License for more details.                            -->
+
+<!-- You should have received a copy of the GNU General Public License       -->
+<!-- along with DobuDish; if not, write to the Free Software                 -->
+<!-- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA -->
+
+<!-- (c) 2006 by AGYNAMIX                                                    -->
+<!-- You can download the latest version of this software at                 -->
+<!-- http://www.agynamix.de                                                  -->
+
+<project name="DobuDish distribution targets" >
+
+  <target name="distribute-dobudish-worker">
+    <delete>
+      <fileset dir="${dobudish.dir}/manuals/dobudish" >
+        <include name="**/*" />
+      </fileset>
+    </delete>
+    <ant antfile="system/etc/build-main.xml" inheritall="false" target="distribute-document">
+      <property name="project.input.document" value="dobudish-manual"/>
+      <property name="project.input.file"     value="dobudish-manual" />
+      <property name="project.output.mode"    value="distribute"/>
+    </ant>
+    <copy todir="${dobudish.dir}/manuals/dobudish">
+      <fileset dir="${dobudish.dir}/documents/dobudish-manual" >
+        <include name="**/*.zip" />
+      </fileset>
+    </copy>
+    <ant antfile="system/etc/build-main.xml" inheritall="false" target="pdf">
+      <property name="project.input.document" value="dobudish-manual"/>
+      <property name="project.input.file"     value="dobudish-manual" />
+      <property name="project.output.mode"    value="pdf"/>
+    </ant>
+    <copy todir="${dobudish.dir}/manuals/dobudish" file="${dobudish.dir}/documents/dobudish-manual/output/pdf/dobudish-manual.pdf" />
+
+    <ant antfile="system/etc/build-main.xml" inheritall="false" target="singlehtml">
+      <property name="project.input.document" value="dobudish-manual"/>
+      <property name="project.output.mode"    value="singlehtml"/>
+      <property name="project.input.file"     value="releasenotes" />
+      <property name="ENV_PARAM_3"            value="releasenotes"/>
+    </ant>
+    <copy todir="${dobudish.dir}" file="${dobudish.dir}/documents/dobudish-manual/output/singlehtml/releasenotes.html" />
+
+    <delete file="${distribute.zip.name}" failonerror="false"/>   
+
+  	<zip destfile="${distribute.zip.name}" update="false" compress="true">
+      <zipfileset dir="${basedir}" prefix="dobudish-${version}" excludes="${distribute.zip.excludes}">
+        <include name="**"/>
+        <exclude name="*.sh"/>
+      </zipfileset>
+      <zipfileset dir="${basedir}" prefix="dobudish-${version}" filemode="755" excludes="${distribute.zip.excludes}">
+        <include name="*.sh"/>
+      </zipfileset>
+    </zip> 
+  	
+  </target>
+
+  <target name="distribute-dobudish-jre">
+    <antcall target="distribute-dobudish-worker">
+      <param name="distribute.zip.excludes" value="**/documents/**,**/.svn/**,**/.hg/**,**/xfc/**,*.zip"/>
+      <param name="distribute.zip.name"     value="dobudish-jre-${version}.zip"/>
+    </antcall>
+  </target>
+
+  <target name="distribute-dobudish-nojre">
+    <antcall target="distribute-dobudish-worker">
+      <param name="distribute.zip.excludes" value="**/documents/**,**/.svn/**,**/.hg/**,**/xfc/**,*.zip,**/jre/**"/>
+      <param name="distribute.zip.name"     value="dobudish-nojre-${version}.zip"/>
+    </antcall>
+  </target>
+  
+  <target name="distribute-dobudish">
+    <echo>Building a distributable ZIP file of DobuDish. Excluding all documents.</echo>        
+    <switch value="${ENV_PARAM_3}">
+      <case value="all">
+        <antcall target="distribute-dobudish-nojre" />
+        <antcall target="distribute-dobudish-jre" />
+      </case>
+      <case value="nojre">
+        <antcall target="distribute-dobudish-nojre" />
+      </case>
+      <case value="jre">
+        <antcall target="distribute-dobudish-jre" />
+      </case>
+      <default>
+        <antcall target="distribute-dobudish-nojre" />
+        <antcall target="distribute-dobudish-jre" />
+      </default>
+    </switch>
+  </target>
+  
+  <target name="distribute-document">
+    <echo>Building a distributable ZIP archive of ${project.input.document}.</echo>
+    <property name="document.archive.file" value="${project.dir}/${project.input.document}-src-${document.version}.zip" />
+    <delete file="${document.archive.file}" failonerror="false"/>
+    <zip destfile="${document.archive.file}" basedir="${project.dir}/.."
+         includes="${project.input.document}/**" compress="true"
+         excludes="${project.input.document}/output/**,**/.svn/**,**/.hg/**,**/*.zip">
+    </zip>
+  </target>
+  
+  <target name="distribute" description="Distribute a part of DobuDish">
+    <if><equals arg1="${project.input.document}" arg2="dobudish" /><then>
+       <antcall target="distribute-dobudish" />
+     </then><else>
+       <antcall target="distribute-document" />
+     </else>
+    </if>  
+  </target>
+
+</project>
